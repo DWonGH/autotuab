@@ -1,5 +1,18 @@
 # auto-eeg-diagnosis-example
 
+This is a fork of robintibor/auto-eeg-diagnosis-example.
+
+To make that code work, this version has a legacy version of braindecode included. Hence if you have installed braindecode in your environment, you need to uninstall it for this to work.
+
+If that's all you need, checkout the tag 'minimal':
+```console
+git checkout minimal
+```
+
+Beyond that tag, things deviate from robintibor's original example.
+
+# Original README for robintibor/auto-eeg-diagnosis-example
+
 ## Requirements
 1. Depends on https://robintibor.github.io/braindecode/ 
 2. This code was programmed in Python 3.6 (might work for other versions also).
