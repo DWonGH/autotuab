@@ -6,11 +6,14 @@ import sys
 import numpy as np
 from numpy.random import RandomState
 import resampy
+import datetime #Imported for generating Log File Name
 from torch import optim
 import torch.nn.functional as F
 import torch as th
 from torch.nn.functional import elu
 from torch import nn
+
+th.cuda.empty_cache()
 
 from braindecode.datautil.signal_target import SignalAndTarget
 from braindecode.torch_ext.util import np_to_var
@@ -35,6 +38,8 @@ from monitors import compute_preds_per_trial, CroppedDiagnosisMonitor
 log = logging.getLogger(__name__)
 log.setLevel('DEBUG')
 
+datetime_object = datetime.datetime.now()
+log_file_name_main = "Auto Diagnosis Log File " + datetime_object.strftime("%d_%m_%Y %H-%M-%S") + ".txt"
 
 def create_set(X, y, inds):
     """
@@ -105,6 +110,45 @@ class TrainValidSplitter(object):
         valid_set = create_set(X, y, valid_inds)
         return train_set, valid_set
 
+def generate_overwritten_config(config, indicies, values):
+    
+    return_config = [""] * 25
+    
+    return_config[0] = CheckConfigValue(config.data_folders, values[0], indicies[0])
+    return_config[1] = CheckConfigValue(config.n_recordings, values[1], indicies[1])
+    return_config[2] = CheckConfigValue(config.sensor_types, values[2], indicies[2])
+    return_config[3] = CheckConfigValue(config.n_chans, values[3], indicies[3])
+    return_config[4] = CheckConfigValue(config.max_recording_mins, values[4], indicies[4])
+    return_config[5] = CheckConfigValue(config.sec_to_cut, values[5], indicies[5])
+    return_config[6] = CheckConfigValue(config.duration_recording_mins, values[6], indicies[6])
+    return_config[7] = CheckConfigValue(config.test_recording_mins, values[7], indicies[7])
+    return_config[8] = CheckConfigValue(config.max_abs_val, values[8], indicies[8])
+    return_config[9] = CheckConfigValue(config.sampling_freq, values[9], indicies[9])
+    return_config[10] = CheckConfigValue(config.divisor, values[10], indicies[10])
+    return_config[11] = CheckConfigValue(config.test_on_eval, values[11], indicies[11])
+    return_config[12] = CheckConfigValue(config.n_folds, values[12], indicies[12])
+    return_config[13] = CheckConfigValue(config.i_test_fold, values[13], indicies[13])
+    return_config[14] = CheckConfigValue(config.shuffle, values[14], indicies[14])
+    return_config[15] = CheckConfigValue(config.model_name, values[15], indicies[15])
+    return_config[16] = CheckConfigValue(config.n_start_chans, values[16], indicies[16])
+    return_config[17] = CheckConfigValue(config.n_chan_factor, values[17], indicies[17])
+    return_config[18] = CheckConfigValue(config.input_time_length, values[18], indicies[18])
+    return_config[19] = CheckConfigValue(config.final_conv_length, values[19], indicies[19])
+    return_config[20] = CheckConfigValue(config.model_constraint, values[20], indicies[20])
+    return_config[21] = CheckConfigValue(config.init_lr, values[21], indicies[21])
+    return_config[22] = CheckConfigValue(config.batch_size, values[22], indicies[22])
+    return_config[23] = CheckConfigValue(config.max_epochs, values[23], indicies[23])
+    return_config[24] = CheckConfigValue(config.cuda, values[24], indicies[24])
+
+
+    return return_config
+    
+def CheckConfigValue(OriginalValue, OverwriteValue, OverwriteCheck):
+    
+    if OverwriteCheck == True:
+        return OverwriteValue
+    
+    return OriginalValue
 
 def run_exp(data_folders,
             n_recordings,
@@ -124,7 +168,8 @@ def run_exp(data_folders,
             input_time_length, final_conv_length,
             model_constraint,
             init_lr,
-            batch_size, max_epochs,cuda,):
+            batch_size, max_epochs,cuda,
+            config_index):
     
     import torch.backends.cudnn as cudnn
     cudnn.benchmark = True
@@ -166,6 +211,7 @@ def run_exp(data_folders,
                                 train_or_eval='eval',
                                 sensor_types=sensor_types)
     X,y = dataset.load()
+    print(X)
     max_shape = np.max([list(x.shape) for x in X],
                        axis=0)
     assert max_shape[1] == int(duration_recording_mins *
@@ -332,7 +378,7 @@ def run_exp(data_folders,
                      run_after_early_stop=run_after_early_stop,
                      batch_modifier=batch_modifier,
                      cuda=cuda)
-    exp.run()
+    exp.run(log_file_name_main, config_index)
     return exp
 
 
@@ -342,48 +388,76 @@ if __name__ == "__main__":
     start_time = time.time()
     logging.basicConfig(format='%(asctime)s %(levelname)s : %(message)s',
                      level=logging.DEBUG, stream=sys.stdout)
-    exp = run_exp(
-        config.data_folders,
-        config.n_recordings,
-        config.sensor_types,
-        config.n_chans,
-        config.max_recording_mins,
-        config.sec_to_cut, config.duration_recording_mins,
-        config.test_recording_mins,
-        config.max_abs_val,
-        config.sampling_freq,
-        config.divisor,
-        config.test_on_eval,
-        config.n_folds, config.i_test_fold,
-        config.shuffle,
-        config.model_name,
-        config.n_start_chans, config.n_chan_factor,
-        config.input_time_length, config.final_conv_length,
-        config.model_constraint,
-        config.init_lr,
-        config.batch_size, config.max_epochs,config.cuda,)
-    end_time = time.time()
-    run_time = end_time - start_time
 
-    log.info("Experiment runtime: {:.2f} sec".format(run_time))
+    config_var_length = 25    #TODO Variable in config.py?
+    modification_indicies = [False] * config_var_length
+    modification_indicies[15] = True
+        
+    #TODO Make this easier to use/more versitile. Load from text file generated from excel program maybe?
+    new_config_values = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "shallow", 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "deep", 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "deep_smac", 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "shallow_smac", 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "linear", 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+        
+    for config_index in range(len(new_config_values)): 
+                
+        new_config = generate_overwritten_config(config, modification_indicies, new_config_values[config_index])
+        
+        exp = run_exp(
+            new_config[0], #data_folders
+            new_config[1], #n_recordings
+            new_config[2], #sensor_types
+            new_config[3], #n_chans
+            new_config[4], #max_recording_mins
+            new_config[5], #sec_to_cut
+            new_config[6], #duration_recording_mins
+            new_config[7], #test_recording_mins
+            new_config[8], #max_abs_val
+            new_config[9], #sampling_freq
+            new_config[10], #divisor
+            new_config[11], #test_on_eval
+            new_config[12], #n_folds
+            new_config[13], #i_test_fold
+            new_config[14], #shuffle
+            new_config[15], #model_name
+            new_config[16], #n_start_chans
+            new_config[17], #n_chan_factor
+            new_config[18], #input_time_length
+            new_config[19], #final_conv_length
+            new_config[20], #model_constraint
+            new_config[21], #init_lr
+            new_config[22], #batch_size
+            new_config[23], #max_epochs
+            new_config[24], #cuda
+            config_index + 1)   #config_index, +1 as starts at 0              
+        end_time = time.time()
+        run_time = end_time - start_time
+    
+        log.info("Experiment runtime: {:.2f} sec".format(run_time))
+    
+        # In case you want to recompute predictions for further analysis:
+        exp.model.eval()
+        for setname in ('train', 'valid', 'test'):
+            log.info("Compute predictions for {:s}...".format(
+                setname))
+            dataset = exp.datasets[setname]
+            if config.cuda:
+                preds_per_batch = [var_to_np(exp.model(np_to_var(b[0]).cuda()))
+                          for b in exp.iterator.get_batches(dataset, shuffle=False)]
+            else:
+                preds_per_batch = [var_to_np(exp.model(np_to_var(b[0])))
+                          for b in exp.iterator.get_batches(dataset, shuffle=False)]
+            preds_per_trial = compute_preds_per_trial(
+                preds_per_batch, dataset,
+                input_time_length=exp.iterator.input_time_length,
+                n_stride=exp.iterator.n_preds_per_input)
+            mean_preds_per_trial = [np.mean(preds, axis=(0, 2)) for preds in
+                                        preds_per_trial]
+            mean_preds_per_trial = np.array(mean_preds_per_trial)
+    
 
-    # In case you want to recompute predictions for further analysis:
-    exp.model.eval()
-    for setname in ('train', 'valid', 'test'):
-        log.info("Compute predictions for {:s}...".format(
-            setname))
-        dataset = exp.datasets[setname]
-        if config.cuda:
-            preds_per_batch = [var_to_np(exp.model(np_to_var(b[0]).cuda()))
-                      for b in exp.iterator.get_batches(dataset, shuffle=False)]
-        else:
-            preds_per_batch = [var_to_np(exp.model(np_to_var(b[0])))
-                      for b in exp.iterator.get_batches(dataset, shuffle=False)]
-        preds_per_trial = compute_preds_per_trial(
-            preds_per_batch, dataset,
-            input_time_length=exp.iterator.input_time_length,
-            n_stride=exp.iterator.n_preds_per_input)
-        mean_preds_per_trial = [np.mean(preds, axis=(0, 2)) for preds in
-                                    preds_per_trial]
-        mean_preds_per_trial = np.array(mean_preds_per_trial)
-
+            
+        
+    
+    

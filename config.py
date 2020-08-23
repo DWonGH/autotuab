@@ -4,6 +4,9 @@
 data_folders = [
     'H:\TUAB2/normal/edf/',
     'H:\TUAB2/abnormal/edf/']
+# data_folders = [
+#     'C:/Users/Izaak/Documents/Internship (David Western)/Code/TUAB/TUAB2/normal/edf/',
+#     'C:/Users/Izaak/Documents/Internship (David Western)/Code/TUAB/TUAB2/abnormal/edf/']
 n_recordings = None  # set to an integer, if you want to restrict the set size
 sensor_types = ["EEG"]
 n_chans = 21
@@ -20,7 +23,7 @@ test_on_eval = True  # teston evaluation set or on training set
 n_folds = 10
 i_test_fold = 9
 shuffle = True
-model_name = 'deep'
+model_name = 'shallow'#'deep'
 n_start_chans = 25
 n_chan_factor = 2  # relevant for deep model only
 input_time_length = 6000
@@ -28,5 +31,8 @@ final_conv_length = 1
 model_constraint = 'defaultnorm'
 init_lr = 1e-3
 batch_size = 64
-max_epochs = 35 # until first stop, the continue train on train+valid
+max_epochs = 10 # until first stop, the continue train on train+valid
 cuda = True # False
+
+def copy(target_list):
+    target_list
