@@ -23,10 +23,7 @@ def natural_key(file_name):
 def time_key(file_name):
     """ provides a time-based sorting key """
     splits = file_name.split('/')
-    try:
-        [date] = re.findall(r'(\d{4}_\d{2}_\d{2})', splits[-1])
-    except Exception:
-        print('wtf')
+    [date] = re.findall(r'(\d{4}_\d{2}_\d{2})', splits[-1])
     date_id = [int(token) for token in date.split('_')]
     recording_id = natural_key(splits[-1])
     session_id = session_key(splits[-2])
@@ -112,9 +109,11 @@ def load_data(fname, preproc_functions, sensor_types=['EEG']):
         for wanted_part in wanted_elecs:
             wanted_found_name = []
             for ch_name in cnt.ch_names:
-                if ' ' + wanted_part + '-' in ch_name:
+                # if ' ' + wanted_part + '-' in ch_name:
+                if wanted_part.lower() in ch_name.lower():
                     wanted_found_name.append(ch_name)
-            assert len(wanted_found_name) == 1
+            # assert len(wanted_found_name) == 1
+            assert len(wanted_found_name) >= 1
             selected_ch_names.append(wanted_found_name[0])
     if 'EKG' in sensor_types:
         wanted_found_name = []
