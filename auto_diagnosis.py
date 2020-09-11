@@ -442,12 +442,20 @@ if __name__ == "__main__":
             log.info("Compute predictions for {:s}...".format(
                 setname))
             dataset = exp.datasets[setname]
+            to_remove, batches = exp.iterator.get_batches(dataset, shuffle=False)
             if config.cuda:
                 preds_per_batch = [var_to_np(exp.model(np_to_var(b[0]).cuda()))
-                          for b in exp.iterator.get_batches(dataset, shuffle=False)]
+                          for b in batches]
             else:
                 preds_per_batch = [var_to_np(exp.model(np_to_var(b[0])))
-                          for b in exp.iterator.get_batches(dataset, shuffle=False)]
+                          for b in batches]
+
+            for index in sorted(to_remove, reverse=True):
+                del dataset.X[index]
+                try:
+                    del dataset.Y[index]
+                except:
+                    pass
             preds_per_trial = compute_preds_per_trial(
                 preds_per_batch, dataset,
                 input_time_length=exp.iterator.input_time_length,
