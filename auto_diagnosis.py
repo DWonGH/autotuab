@@ -3,6 +3,7 @@ import time
 from copy import copy
 import sys
 
+from config_overrider import new_config_values
 import numpy as np
 from numpy.random import RandomState
 import resampy
@@ -392,14 +393,7 @@ if __name__ == "__main__":
     config_var_length = 25    #TODO Variable in config.py?
     modification_indicies = [False] * config_var_length
     modification_indicies[15] = True
-        
-    #TODO Make this easier to use/more versitile. Load from text file generated from excel program maybe?
-    new_config_values = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "shallow", 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "deep", 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "deep_smac", 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "shallow_smac", 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "linear", 0, 0, 0, 0, 0, 0, 0, 0, 0]]
-        
+
     for config_index in range(len(new_config_values)): 
                 
         new_config = generate_overwritten_config(config, modification_indicies, new_config_values[config_index])
