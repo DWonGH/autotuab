@@ -190,6 +190,9 @@ class DiagnosisSet(object):
             mask = lengths < self.max_recording_mins * 60
             cleaned_file_names = np.array(all_file_names)[mask]
             cleaned_labels = labels[mask]
+            mask = lengths > 120
+            cleaned_file_names = np.array(all_file_names)[mask]
+            cleaned_labels = labels[mask]
         else:
             cleaned_file_names = np.array(all_file_names)
             cleaned_labels = labels
