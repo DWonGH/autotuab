@@ -40,7 +40,7 @@ log = logging.getLogger(__name__)
 log.setLevel('DEBUG')
 
 datetime_object = datetime.datetime.now()
-log_file_name_main = "Auto Diagnosis Log File " + datetime_object.strftime("%d_%m_%Y %H-%M-%S") + ".txt"
+log_file_name_main = "Auto Diagnosis Log File " + datetime_object.strftime("%Y-m-%d %H_%M_%S") + ".txt"
 
 def create_set(X, y, inds):
     """
