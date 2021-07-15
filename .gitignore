@@ -1,4 +1,10 @@
+# Project-specific items
 Auto Diagnosis Log File*
+config_overrider.py
+
+
+# Generic Python gitignore
+
 # Editors
 .vscode/
 .idea/
