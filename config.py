@@ -2,8 +2,8 @@
 # below these given folders
 # Folders should contain all normal and abnormal data files without duplications
 data_folders = [
-    'H:\TUAB2/normal/edf/',
-    'H:\TUAB2/abnormal/edf/']
+    'H:\TUAB2_relabelled/normal/edf/',
+    'H:\TUAB2_relabelled/abnormal/edf/']
 n_recordings = None  # set to an integer, if you want to restrict the set size
 sensor_types = ["EEG"]
 n_chans = 21

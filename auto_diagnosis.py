@@ -42,6 +42,10 @@ log.setLevel('DEBUG')
 datetime_object = datetime.datetime.now()
 log_file_name_main = "Auto Diagnosis Log File " + datetime_object.strftime("%Y-m-%d %H_%M_%S") + ".txt"
 
+global X, y, test_X, test_y
+X = y = test_X = test_y = None
+reload_data_each_exp = False
+
 def create_set(X, y, inds):
     """
     X list and y nparray
@@ -211,14 +215,19 @@ def run_exp(data_folders,
                                 data_folders=data_folders,
                                 train_or_eval='eval',
                                 sensor_types=sensor_types)
-    X,y = dataset.load()
+
+    global X, y, text_X, test_y
+    if reload_data_each_exp or X is None:
+        X,y = dataset.load()
+
     print(X)
     max_shape = np.max([list(x.shape) for x in X],
                        axis=0)
     assert max_shape[1] == int(duration_recording_mins *
                                sampling_freq * 60)
     if test_on_eval:
-        test_X, test_y = test_dataset.load()
+        if reload_data_each_exp or test_X is None:
+            test_X, test_y = test_dataset.load()
         max_shape = np.max([list(x.shape) for x in test_X],
                            axis=0)
         assert max_shape[1] == int(test_recording_mins *
@@ -232,8 +241,8 @@ def run_exp(data_folders,
                                           shuffle=shuffle)
         train_set, valid_set = splitter.split(X, y)
         test_set = SignalAndTarget(test_X, test_y)
-        del test_X, test_y
-    del X,y # shouldn't be necessary, but just to make sure
+        #del test_X, test_y
+    # del X,y # shouldn't be necessary, but just to make sure
 
     set_random_seeds(seed=20170629, cuda=cuda)
     n_classes = 2
@@ -391,11 +400,13 @@ if __name__ == "__main__":
                      level=logging.DEBUG, stream=sys.stdout)
 
     config_var_length = 25    #TODO Variable in config.py?
-    modification_indicies = [False] * config_var_length
-    modification_indicies[15] = True
+    # modification_indicies = [False] * config_var_length
+    # modification_indicies[15] = True
 
-    for config_index in range(len(new_config_values)): 
-                
+    for config_index in range(len(new_config_values)):
+
+        modification_indicies = [False if new_config_values[config_index][k]==0 else True for k in range(config_var_length)]
+
         new_config = generate_overwritten_config(config, modification_indicies, new_config_values[config_index])
         
         exp = run_exp(
