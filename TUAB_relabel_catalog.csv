@@ -1,0 +1,54 @@
+Original Path,New label,Impression section,Notes,,,,,,
+v2.0.0\edf\train\normal\01_tcp_ar\007\00000739\s002_2012_09_26\00000739_s002.txt,Abnormal,This is an abnormal EEG due to:  Generalized background slowing.,,,,,,,
+v2.0.0\edf\train\normal\01_tcp_ar\008\00000883\s015_2010_12_13\00000883_s015.txt,Abnormal,"Abnormal EEG due to:
+1. Attenuation of alpha rhythm on the right.
+2. Disruption of rhythmic activity on the right.",,,,,,,
+v2.0.0\edf\train\normal\01_tcp_ar\027\00002775\s005_2009_12_11\00002775_s005.txt,Abnormal,"Abnormal EEG due to: 
+1. Mild excess theta.",,,,,,,
+v2.0.0\edf\train\normal\01_tcp_ar\031\00003101\s004_2010_04_02\00003101_s004.txt,Abnormal,"Abnormal EEG due to:
+1. Left temporal focal slowing.",,,,,,,
+v2.0.0\edf\train\normal\01_tcp_ar\031\00003101\s005_2012_02_08\00003101_s005.txt,Abnormal,"Abnormal EEG due to:
+Left temporal focal slowing.",,,,,,,
+v2.0.0\edf\train\normal\01_tcp_ar\050\00005096\s008_2010_09_07\00005096_s008.txt,Abnormal,"This EEG is mildly abnormal due to:
+1. There is mild degree of disorganization.",,,,,,,
+v2.0.0\edf\train\normal\01_tcp_ar\060\00006017\s005_2012_05_14\00006017_s005.txt,Abnormal,"Abnormal EEG due to:
+Left anterior temporal focal slowing.",,,,,,,
+v2.0.0\edf\train\normal\01_tcp_ar\062\00006213\s002_2012_12_16\00006213_s002.txt,Abnormal,This is an abnormal EEG recording due to excess theta activity during wakefulness.,,,,,,,
+v2.0.0\edf\train\normal\01_tcp_ar\064\00006440\s006_2010_04_19\00006440_s006.txt,Abnormal,"Markedly abnormal EEG due to:
+1. Three electrographic seizures.
+2. Interictal pattern of marked background suppression.
+3. Epileptiform activity, which Is primarily on the right but is complex in nature.",,,,,,,
+v2.0.0\edf\train\normal\01_tcp_ar\065\00006535\s001_2010_09_03\00006535_s001.txt,Abnormal,"Abnormal EEG due to:
+1. Very modest background slowing.
+2. A burst of rhythmic slowing on the left.",,,,,,,
+v2.0.0\edf\train\normal\01_tcp_ar\065\00006535\s002_2012_06_25\00006535_s002.txt,Abnormal,"Abnormal EEG due to:
+Left temporal rhythmic theta.
+Rare left temporal sharp waves.
+Alpha asymmetry.",,,,,,,
+v2.0.0\edf\train\normal\01_tcp_ar\073\00007397\s002_2012_03_28\00007397_s002.txt,Abnormal,"Abnormal EEG due to:
+Left frontal central slowing and breech.",,,,,,,
+v2.0.0\edf\train\normal\01_tcp_ar\081\00008157\s001_2011_09_14\00008157_s001.txt,Abnormal,Abnormal EEG awake and sleep.,,,,,,,
+v2.0.0\edf\train\normal\01_tcp_ar\086\00008617\s002_2013_02_11\00008617_s002.txt,Abnormal,Abnormal electroencephalogram due to right parietal focal slowing.,,,,,,,
+v2.0.0\edf\train\normal\01_tcp_ar\086\00008644\s001_2012_01_25\00008644_s001.txt,Abnormal,"Abnormal EEG due to:
+Intermittent right anterior temporal focal slow waves.",,,,,,,
+v2.0.0\edf\train\normal\01_tcp_ar\088\00008818\s002_2012_05_25\00008818_s002.txt,Abnormal,"Abnormal EEG due to:
+myoclonus and diffuse suppression of the EEG.",,,,,,,
+v2.0.0\edf\train\normal\01_tcp_ar\093\00009316\s001_2012_08_22\00009316_s001.txt,Exclude,"This is an abnormal primarily asleep and briefly awake EEG due to excessive drowsiness and REM sleep captured on a 22-minute study.  These findings indicate excessive drowsiness.  In a routine EEG, a finding of REM sleep is abnormal.  In a proper clinical setting, further investigation to causes of excessive sleepiness may be considered.  The lack of epileptiform discharges in a routine EEG does not exclude the clinical diagnosis of epilepsy.","In this description, it sounds like the abnormality relates to the context rather than the raw EEG data.",,,,,,
+v2.0.0\edf\train\normal\01_tcp_ar\099\00009969\s001_2013_03_13\00009969_s001.txt,Abnormal,A very subtle abnormality was noted in this EEG just as the patient was becoming drowsy and included some focal theta in the left occipital parietal region.,,,,,,,
+v2.0.0\edf\train\normal\01_tcp_ar\104\00010489\s001_2013_07_04\00010489_s001.txt,Abnormal,"Abnormal EEG due to generalized slowing, as well as some right central temporal focal slowing.",,,,,,,
+v2.0.0\edf\train\abnormal\01_tcp_ar\001\00000136\s002_2012_11_02\00000136_s002.txt,Normal,Normal EEG.,,,,,,,
+v2.0.0\edf\train\abnormal\01_tcp_ar\055\00005553\s004_2013_01_23\00005553_s004.txt,Normal,"This is a normal awake and drowsy 25-minute EEG.  No epileptiform discharges were captured, however stage II sleep was not recorded. If clinical indication for seizures persists, a repeat study with stage II sleep may be of benefit.",,,,,,,
+v2.0.0\edf\train\abnormal\01_tcp_ar\060\00006059\s004_2012_06_25\00006059_s004.txt,Normal,Normal EEG.,,,,,,,
+v2.0.0\edf\train\abnormal\01_tcp_ar\068\00006817\s003_2013_06_17\00006817_s003.txt,Normal,Normal EEG.,,,,,,,
+v2.0.0\edf\train\abnormal\01_tcp_ar\080\00008064\s001_2011_03_31\00008064_s001.txt,Abnormal,"A normal EEG due to:
+1. Background disorganization and slowing.
+2. Subtle focal slowing from the right hemisphere, particularly frontocentral","This one seems to be placed correctly. Typo in impression? ""A normal"" should be ""Abnormal""",,,,,,
+v2.0.0\edf\train\abnormal\01_tcp_ar\085\00008587\s002_2012_03_03\00008587_s002.txt,Normal,Normal awake and sleep EEG.  Please note that this recording is mainly in sleep.,,,,,,,
+v2.0.0\edf\train\abnormal\01_tcp_ar\086\00008648\s002_2012_06_04\00008648_s002.txt,Normal,Normal awake and sleep EEG.,,,,,,,
+v2.0.0\edf\train\abnormal\01_tcp_ar\087\00008791\s001_2012_05_31\00008791_s001.txt,Normal,Normal awake EEG.,,,,,,,
+v2.0.0\edf\train\abnormal\01_tcp_ar\093\00009391\s001_2012_08_22\00009391_s001.txt,Normal,Normal awake and asleep EEG.,,,,,,,
+v2.0.0\edf\train\abnormal\01_tcp_ar\098\00009811\s001_2013_04_01\00009811_s001.txt,Normal,Normal mainly asleep EEG.,,,,,,,
+v2.0.0\edf\train\abnormal\01_tcp_ar\098\00009848\s001_2013_04_08\00009848_s001.txt,Normal,Normal awake and asleep EEG.,,,,,,,
+v2.0.0\edf\train\abnormal\01_tcp_ar\101\00010140\s002_2013_02_22\00010140_s002.txt,Normal,Electroencephalogram within normal limits.,,,,,,,
+v2.0.0\edf\train\abnormal\01_tcp_ar\104\00010452\s001_2013_06_21\00010452_s001.txt,Normal,Normal electroencephalogram in limited wakefulness and mainly in sleep.,,,,,,,
+v2.0.0\edf\train\abnormal\01_tcp_ar\103\00010373\s001_2013_06_03\00010373_s001.txt,Normal,Normal awake and asleep electroencephalogram.,,,,,,,
