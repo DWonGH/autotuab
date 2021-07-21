@@ -40,7 +40,7 @@ log = logging.getLogger(__name__)
 log.setLevel('DEBUG')
 
 datetime_object = datetime.datetime.now()
-log_file_name_main = "Auto Diagnosis Log File " + datetime_object.strftime("%Y-m-%d %H_%M_%S") + ".txt"
+log_file_name_main = "Auto Diagnosis Log File " + datetime_object.strftime("%Y-%m-%d %H_%M_%S") + ".txt"
 
 global X, y, test_X, test_y
 X = y = test_X = test_y = None
@@ -216,7 +216,7 @@ def run_exp(data_folders,
                                 train_or_eval='eval',
                                 sensor_types=sensor_types)
 
-    global X, y, text_X, test_y
+    global X, y, test_X, test_y
     if reload_data_each_exp or X is None:
         X,y = dataset.load()
 
