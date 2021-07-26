@@ -3,6 +3,7 @@ import re
 import numpy as np
 import glob
 import os.path
+import csv
 
 import mne
 
@@ -45,6 +46,9 @@ def read_all_file_names(path, extension, key="time"):
 
     elif key == 'natural':
         return sorted(file_paths, key=natural_key)
+
+    else:
+        return file_paths
 
 def get_info_with_mne(file_path):
     """ read info from the edf file without loading the data. loading data is done in multiprocessing since it takes
@@ -113,7 +117,9 @@ def load_data(fname, preproc_functions, sensor_types=['EEG']):
                 if wanted_part.lower() in ch_name.lower():
                     wanted_found_name.append(ch_name)
             # assert len(wanted_found_name) == 1
-            assert len(wanted_found_name) >= 1
+            if len(wanted_found_name) < 1:
+                log.info("Desired electrodes not found. Skipping this file.")
+                return None
             selected_ch_names.append(wanted_found_name[0])
     if 'EKG' in sensor_types:
         wanted_found_name = []
@@ -148,38 +154,62 @@ def load_data(fname, preproc_functions, sensor_types=['EEG']):
     return data
 
 
-def get_all_sorted_file_names_and_labels(train_or_eval, folders):
+def get_all_sorted_file_names_and_labels(train_or_eval, folders, training_labels_from_csv):
     all_file_names = []
-    for folder in folders:
-        full_folder = os.path.join(folder, train_or_eval) + '/'
-        log.info("Reading {:s}...".format(full_folder))
-        this_file_names = read_all_file_names(full_folder, '.edf', key='time')
-        log.info(".. {:d} files.".format(len(this_file_names)))
-        all_file_names.extend(this_file_names)
-    log.info("{:d} files in total.".format(len(all_file_names)))
-    all_file_names = sorted(all_file_names, key=time_key)
+    if train_or_eval == 'train' and training_labels_from_csv:
+        folders = folders[2:]
+        key = None
 
-    labels = ['/abnormal/' in f for f in all_file_names]
-    labels = np.array(labels).astype(np.int64)
-    return all_file_names, labels
+        with open('training_labels.csv', newline='') as csvfile:
+            label_catalog_reader = csv.reader(csvfile, delimiter='\t')
+            k = 0
+            all_labelled_file_names = []
+            labels = []
+            for row in label_catalog_reader:
+                id, _ = os.path.splitext(os.path.basename(row[1]))
+                label = row[3]
+                full_folder = os.path.join(folders[0], row[0])
+                this_file_names = read_all_file_names(full_folder, '.edf', key='time')
+                [all_labelled_file_names.append(ff) for ff in this_file_names if id in os.path.basename(ff)]
+                [labels.append(label) for ff in this_file_names if id in os.path.basename(ff)]
+
+            labels = np.array(labels).astype(np.int64)
+            return all_labelled_file_names, labels
+
+    else:
+        folders = folders[:2]
+        folders = [os.path.join(folder, train_or_eval) + '/' for folder in folders]
+        for full_folder in folders:
+            log.info("Reading {:s}...".format(full_folder))
+            this_file_names = read_all_file_names(full_folder, '.edf', key='time')
+            log.info(".. {:d} files.".format(len(this_file_names)))
+            all_file_names.extend(this_file_names)
+        log.info("{:d} files in total.".format(len(all_file_names)))
+
+        all_file_names = sorted(all_file_names, key=time_key)
+        labels = ['/abnormal/' in f for f in all_file_names]
+        labels = np.array(labels).astype(np.int64)
+        return all_file_names, labels
 
 
 class DiagnosisSet(object):
     def __init__(self, n_recordings, max_recording_mins, preproc_functions,
                  data_folders,
-                 train_or_eval='train', sensor_types=['EEG'],):
+                 train_or_eval='train', sensor_types=['EEG'], training_labels_from_csv=False):
         self.n_recordings = n_recordings
         self.max_recording_mins = max_recording_mins
         self.preproc_functions = preproc_functions
         self.train_or_eval = train_or_eval
         self.sensor_types = sensor_types
         self.data_folders = data_folders
+        self.training_labels_from_csv = training_labels_from_csv
 
     def load(self, only_return_labels=False):
         log.info("Read file names")
         all_file_names, labels = get_all_sorted_file_names_and_labels(
             train_or_eval=self.train_or_eval,
-            folders=self.data_folders,)
+            folders=self.data_folders,
+            training_labels_from_csv=self.training_labels_from_csv)
 
         if self.max_recording_mins is not None:
             log.info("Read recording lengths...")
@@ -191,8 +221,8 @@ class DiagnosisSet(object):
             cleaned_file_names = np.array(all_file_names)[mask]
             cleaned_labels = labels[mask]
             mask = lengths > 120
-            cleaned_file_names = np.array(all_file_names)[mask]
-            cleaned_labels = labels[mask]
+            cleaned_file_names = np.array(cleaned_file_names)[mask]
+            cleaned_labels = cleaned_labels[mask]
         else:
             cleaned_file_names = np.array(all_file_names)
             cleaned_labels = labels
@@ -205,8 +235,8 @@ class DiagnosisSet(object):
             log.info("Load {:d} of {:d}".format(i_fname + 1,n_files))
             x = load_data(fname, preproc_functions=self.preproc_functions,
                           sensor_types=self.sensor_types)
-            assert x is not None
-            X.append(x)
-            y.append(cleaned_labels[i_fname])
+            if x is not None:
+                X.append(x)
+                y.append(cleaned_labels[i_fname])
         y = np.array(y)
         return X, y

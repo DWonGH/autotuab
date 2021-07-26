@@ -1,9 +1,12 @@
 # There should always be a 'train' and 'eval' folder directly
-# below these given folders
-# Folders should contain all normal and abnormal data files without duplications
+# below the first two given folders, containing all normal and abnormal data files without duplications (normally from
+# TUAB). Folders after the first are used for training only when training_labels_from_csv is True.
 data_folders = [
-    'H:\TUAB2_relabelled/normal/edf/',
-    'H:\TUAB2_relabelled/abnormal/edf/']
+    'H:\TUAB2/normal/edf/',
+    'H:\TUAB2/abnormal/edf/',
+    # 'H:\TUAB2_relabelled/normal/edf/',
+    # 'H:\TUAB2_relabelled/abnormal/edf/',
+    'H:\TUEG/']
 n_recordings = None  # set to an integer, if you want to restrict the set size
 sensor_types = ["EEG"]
 n_chans = 21
@@ -30,6 +33,7 @@ init_lr = 1e-3
 batch_size = 64
 max_epochs = 10 # until first stop, the continue train on train+valid
 cuda = True # False
+training_labels_from_csv = True
 
 def copy(target_list):
     target_list
