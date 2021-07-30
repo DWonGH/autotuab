@@ -220,10 +220,15 @@ def run_exp(data_folders,
                                 sensor_types=sensor_types)
 
     global X, y, test_X, test_y
-    if reload_data_each_exp or X is None:
-        X,y = dataset.load()
+    if X is None:
+        import pickle
+        X, y = pickle.load( open( "H:/auto-eeg_bal.pkl", "rb" ) )
+    # if reload_data_each_exp or X is None:
+    #     X,y = dataset.load()
+    #     import pickle
+    #     pickle.dump([X, y], open( "H:/auto-eeg_bal.pkl", "wb" ))
 
-    print(X)
+    # print(X)
     log.info(f"{len(X)} files in train+val data.")
     max_shape = np.max([list(x.shape) for x in X],
                        axis=0)
@@ -403,9 +408,7 @@ if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s %(levelname)s : %(message)s',
                      level=logging.DEBUG, stream=sys.stdout)
 
-    config_var_length = 26    #TODO Variable in config.py?
-    # modification_indicies = [False] * config_var_length
-    # modification_indicies[15] = True
+    config_var_length = 26
 
     for config_index in range(len(new_config_values)):
 
