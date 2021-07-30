@@ -162,12 +162,22 @@ def get_all_sorted_file_names_and_labels(train_or_eval, folders, training_labels
 
         with open('training_labels.csv', newline='') as csvfile:
             label_catalog_reader = csv.reader(csvfile, delimiter='\t')
+
+            # Skip the header row (column names)
+            next(label_catalog_reader, None)
+
             k = 0
             all_labelled_file_names = []
             labels = []
             for row in label_catalog_reader:
                 id, _ = os.path.splitext(os.path.basename(row[1]))
-                label = row[3]
+                p_ab = float(row[2])
+                label_from_ML = row[3]
+                label_from_rules = row[4]
+                if label_from_ML==label_from_rules and (p_ab>=0.99 or p_ab<=0.01):
+                    continue
+                else:
+                    label = label_from_ML
                 full_folder = os.path.join(folders[0], row[0])
                 this_file_names = read_all_file_names(full_folder, '.edf', key='time')
                 [all_labelled_file_names.append(ff) for ff in this_file_names if id in os.path.basename(ff)]
@@ -195,7 +205,8 @@ def get_all_sorted_file_names_and_labels(train_or_eval, folders, training_labels
 class DiagnosisSet(object):
     def __init__(self, n_recordings, max_recording_mins, preproc_functions,
                  data_folders,
-                 train_or_eval='train', sensor_types=['EEG'], training_labels_from_csv=False):
+                 train_or_eval='train', sensor_types=['EEG'], training_labels_from_csv=False,
+                 balance_data=False):
         self.n_recordings = n_recordings
         self.max_recording_mins = max_recording_mins
         self.preproc_functions = preproc_functions
@@ -203,6 +214,7 @@ class DiagnosisSet(object):
         self.sensor_types = sensor_types
         self.data_folders = data_folders
         self.training_labels_from_csv = training_labels_from_csv
+        self.balance_data = balance_data
 
     def load(self, only_return_labels=False):
         log.info("Read file names")
@@ -220,12 +232,18 @@ class DiagnosisSet(object):
             mask = lengths < self.max_recording_mins * 60
             cleaned_file_names = np.array(all_file_names)[mask]
             cleaned_labels = labels[mask]
+            lengths = lengths[mask]
             mask = lengths > 120
             cleaned_file_names = np.array(cleaned_file_names)[mask]
             cleaned_labels = cleaned_labels[mask]
         else:
             cleaned_file_names = np.array(all_file_names)
             cleaned_labels = labels
+
+        if self.balance_data:
+            # Whichever class we have more of, choose a random selection of the same size as the smaller class
+            cleaned_file_names, cleaned_labels = self.__balance_data(cleaned_file_names, cleaned_labels)
+
         if only_return_labels:
             return cleaned_labels
         X = []
@@ -235,8 +253,71 @@ class DiagnosisSet(object):
             log.info("Load {:d} of {:d}".format(i_fname + 1,n_files))
             x = load_data(fname, preproc_functions=self.preproc_functions,
                           sensor_types=self.sensor_types)
-            if x is not None:
+            if x is not None and x.shape[1]>=6000:
                 X.append(x)
                 y.append(cleaned_labels[i_fname])
         y = np.array(y)
         return X, y
+
+    def __balance_data(self, file_names, labels):
+        n_abnormal = np.count_nonzero(labels == 1)
+        n_normal = np.count_nonzero(labels == 0)
+        print(f"Started with {n_abnormal} abnormal and {n_normal} normal recordings.")
+
+        # Separate normals and abnormals
+        abnormal_mask = labels == 1
+        normal_mask = labels == 0
+        abnormal_file_names = file_names[abnormal_mask]
+        normal_file_names = file_names[normal_mask]
+
+        # Reduce the larger class
+        if n_abnormal > n_normal:
+            print(f"Reducing # of abnormals from {n_abnormal} to {n_normal}")
+            abnormal_file_names = self.__pick_n_by_subject(abnormal_file_names, n_normal)
+            n_abnormal = n_normal
+        else:
+            print(f"Reducing # of normals from {n_normal} to {n_abnormal}")
+            normal_file_names = self.__pick_n_by_subject(normal_file_names, n_abnormal)
+            n_normal = n_abnormal
+
+        # Recombine the data
+        labels = np.concatenate((np.ones(n_abnormal, dtype=np.int64), np.zeros(n_normal, dtype=np.int64)))
+        file_names = np.concatenate((abnormal_file_names, normal_file_names))
+
+        # Shuffle normals and abnormals together
+        shuffle_ind = np.random.permutation(n_normal+n_abnormal)
+        labels = labels[shuffle_ind]
+        file_names = file_names[shuffle_ind]
+        return file_names, labels
+
+    def __pick_n_by_subject(self, file_names, n):
+        # Choose n files from file_names, maximising the spread across unique subjects:
+
+        n_file_names = len(file_names)
+        fns = np.copy(file_names)
+        np.random.shuffle(fns)
+        fns_to_pick_from = fns.tolist() # For ease of 'popping'
+        fns_picked = []
+        sub_IDs = [os.path.basename(fn).split('_')[0] for fn in file_names]
+        unique_sub_IDs = np.unique(sub_IDs)
+        n_subs = len(unique_sub_IDs)
+        print(f"Picking {n} files from {n_subs} unique subjects.")
+        k = 0
+        for c in range(n):
+            found = False
+            while not found:
+                sub_ID = unique_sub_IDs[k % n_subs]
+                for i,s in enumerate(fns_to_pick_from):
+                    if sub_ID in s:
+                        fns_picked.append(fns_to_pick_from.pop(i))
+                        found = True
+                        break
+                if not found:
+                    # Try the next sub_ID
+                    k += 1
+                    assert(k <= n_file_names)
+
+        return np.array(fns_picked)
+
+
+
