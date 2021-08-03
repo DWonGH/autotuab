@@ -96,4 +96,4 @@ def undo_relabel(TUAB_dir, exclude_all=False):
 
 
 
-relabel('H:\TUAB_txt_relabelled', exclude_all=False)
+# relabel('H:\TUAB_txt_relabelled', exclude_all=False)
