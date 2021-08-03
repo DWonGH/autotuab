@@ -1,6 +1,27 @@
-# auto-eeg-diagnosis-example
+# AutoTUAB
 
-This is a fork of robintibor/auto-eeg-diagnosis-example.
+This repository contains code and data used to train Schirrmeister et al's BD-Deep4 convolutional neural network against the variants of the Temple University Hospital Abnormal EEG Corpus (TUAB). In particular, it allows the AutoTUAB dataset to be generated from the larger Temple University Hospital EEG Corpus (TUEG) using labels based on automated classification of the text reports accompanying each EEG session in that database.
+
+# Instructions
+
+* Clone this repository
+* Download TUAB and TUEG from https://www.isip.piconepress.com/projects/tuh_eeg/html/downloads.shtml to any folder on your computer.
+* Rearrange TUAB folder structure to the format required by Schirrmeister et al's original code
+  * Edit rearrange_TUAB.bat so that SRCDIR points to the path of your existing copy of TUAB and DESTDIR names a path in which to store a rearranged copy.
+  * Run rearrange_TUAB.bat to generate the new copy.
+  * Optional - Run relabel_Relabel TUAB so that labels agree with original report files. 
+    * In python: 
+  ```python
+  import relabel_TUAB as rlb
+  rlb.relabel('Path\to\TUAB_copy', exclude_all=False)
+* Rename `config_overrider - template.py' to `config_overrider.py'
+* Run auto_diagnosis.py
+
+Performance metrics will be saved to a text file in the same directory.
+
+# Reproducing Schirrmeister et al
+
+This repo originated with an attempt to reproduce the work of Schirrmeister et al, by forking github.com/robintibor/auto-eeg-diagnosis-example.
 
 To make that code work, this version has a legacy version of braindecode included. Hence if you have installed braindecode in your environment, you need to uninstall it for this to work.
 
