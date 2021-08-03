@@ -117,7 +117,7 @@ class TrainValidSplitter(object):
 
 def generate_overwritten_config(config, indicies, values):
     
-    return_config = [""] * 26
+    return_config = [""] * len(indicies)
     
     return_config[0] = CheckConfigValue(config.data_folders, values[0], indicies[0])
     return_config[1] = CheckConfigValue(config.n_recordings, values[1], indicies[1])
@@ -145,6 +145,7 @@ def generate_overwritten_config(config, indicies, values):
     return_config[23] = CheckConfigValue(config.max_epochs, values[23], indicies[23])
     return_config[24] = CheckConfigValue(config.cuda, values[24], indicies[24])
     return_config[25] = CheckConfigValue(config.training_labels_from_csv, values[25], indicies[25])
+    return_config[26] = CheckConfigValue(config.append_csv_set_to_TUAB, values[26], indicies[26])
 
 
     return return_config
@@ -176,6 +177,7 @@ def run_exp(data_folders,
             init_lr,
             batch_size, max_epochs,cuda,
             training_labels_from_csv,
+            append_csv_set_to_TUAB,
             config_index):
     
     import torch.backends.cudnn as cudnn
@@ -205,7 +207,9 @@ def run_exp(data_folders,
                            data_folders=data_folders,
                            train_or_eval='train',
                            sensor_types=sensor_types,
-                           training_labels_from_csv=training_labels_from_csv)
+                           training_labels_from_csv=training_labels_from_csv,
+                           append_csv_set_to_TUAB=append_csv_set_to_TUAB,
+                           balance_data=training_labels_from_csv)
     if test_on_eval:
         if test_recording_mins is None:
             test_recording_mins = duration_recording_mins
@@ -220,13 +224,13 @@ def run_exp(data_folders,
                                 sensor_types=sensor_types)
 
     global X, y, test_X, test_y
-    if X is None:
-        import pickle
-        X, y = pickle.load( open( "H:/auto-eeg_bal.pkl", "rb" ) )
-    # if reload_data_each_exp or X is None:
-    #     X,y = dataset.load()
+    # if X is None:
     #     import pickle
-    #     pickle.dump([X, y], open( "H:/auto-eeg_bal.pkl", "wb" ))
+    #     X, y = pickle.load( open( "H:/auto-eeg_bal2.pkl", "rb" ) )
+    if reload_data_each_exp or X is None:
+        X,y = dataset.load()
+        import pickle
+        pickle.dump([X, y], open( "H:/auto-eeg_TUABPlus_1min.pkl", "wb" ))
 
     # print(X)
     log.info(f"{len(X)} files in train+val data.")
@@ -408,7 +412,7 @@ if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s %(levelname)s : %(message)s',
                      level=logging.DEBUG, stream=sys.stdout)
 
-    config_var_length = 26
+    config_var_length = 27
 
     for config_index in range(len(new_config_values)):
 
@@ -443,6 +447,7 @@ if __name__ == "__main__":
             new_config[23], #max_epochs
             new_config[24], #cuda
             new_config[25], #training_labels_from_csv
+            new_config[26], #append_csv_set_to_TUAB
             config_index + 1)   #config_index, +1 as starts at 0              
         end_time = time.time()
         run_time = end_time - start_time

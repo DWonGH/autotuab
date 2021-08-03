@@ -4,6 +4,7 @@ import numpy as np
 import glob
 import os.path
 import csv
+import random
 
 import mne
 
@@ -154,39 +155,16 @@ def load_data(fname, preproc_functions, sensor_types=['EEG']):
     return data
 
 
-def get_all_sorted_file_names_and_labels(train_or_eval, folders, training_labels_from_csv):
+def get_all_sorted_file_names_and_labels(train_or_eval, folders, training_labels_from_csv, append_csv_set_to_TUAB=False):
     all_file_names = []
-    if train_or_eval == 'train' and training_labels_from_csv:
-        folders = folders[2:]
-        key = None
 
-        with open('training_labels.csv', newline='') as csvfile:
-            label_catalog_reader = csv.reader(csvfile, delimiter='\t')
+    if append_csv_set_to_TUAB and not training_labels_from_csv:
+        error("If append_csv_set_to_TUAB is set to True in config.py, training_labels_from_csv must also be set to True.")
 
-            # Skip the header row (column names)
-            next(label_catalog_reader, None)
+    if training_labels_from_csv:
+        TUEG_folders = folders[2:]
 
-            k = 0
-            all_labelled_file_names = []
-            labels = []
-            for row in label_catalog_reader:
-                id, _ = os.path.splitext(os.path.basename(row[1]))
-                p_ab = float(row[2])
-                label_from_ML = row[3]
-                label_from_rules = row[4]
-                if label_from_ML==label_from_rules and (p_ab>=0.99 or p_ab<=0.01):
-                    continue
-                else:
-                    label = label_from_ML
-                full_folder = os.path.join(folders[0], row[0])
-                this_file_names = read_all_file_names(full_folder, '.edf', key='time')
-                [all_labelled_file_names.append(ff) for ff in this_file_names if id in os.path.basename(ff)]
-                [labels.append(label) for ff in this_file_names if id in os.path.basename(ff)]
-
-            labels = np.array(labels).astype(np.int64)
-            return all_labelled_file_names, labels
-
-    else:
+    if train_or_eval == 'eval' or append_csv_set_to_TUAB or not training_labels_from_csv:
         folders = folders[:2]
         folders = [os.path.join(folder, train_or_eval) + '/' for folder in folders]
         for full_folder in folders:
@@ -194,19 +172,60 @@ def get_all_sorted_file_names_and_labels(train_or_eval, folders, training_labels
             this_file_names = read_all_file_names(full_folder, '.edf', key='time')
             log.info(".. {:d} files.".format(len(this_file_names)))
             all_file_names.extend(this_file_names)
-        log.info("{:d} files in total.".format(len(all_file_names)))
 
         all_file_names = sorted(all_file_names, key=time_key)
-        labels = ['/abnormal/' in f for f in all_file_names]
-        labels = np.array(labels).astype(np.int64)
-        return all_file_names, labels
+        labels = [int('/abnormal/' in f) for f in all_file_names]
+
+
+    if train_or_eval == 'train' and training_labels_from_csv:
+        # Generate AutoTUAB/TUAB+ dataset
+
+        with open('training_labels.csv', newline='') as csvfile:
+            label_catalog_reader = csv.reader(csvfile, delimiter='\t')
+
+            # Skip the header row (column names)
+            next(label_catalog_reader, None)
+
+            all_labelled_TUEG_file_names = []
+            TUEG_labels = []
+            for row in label_catalog_reader:
+                id, _ = os.path.splitext(os.path.basename(row[1]))
+                p_ab = float(row[2])
+                label_from_ML = row[3]
+                label_from_rules = row[4]
+                # if label_from_ML==label_from_rules and (p_ab>=0.99 or p_ab<=0.01):
+                if (p_ab>=0.99 or p_ab<=0.01):
+                    label = label_from_ML
+                else:
+                    continue
+                full_folder = os.path.join(TUEG_folders[0], row[0])
+                this_file_names = read_all_file_names(full_folder, '.edf', key='time')
+                [all_labelled_TUEG_file_names.append(ff) for ff in this_file_names if id in os.path.basename(ff)]
+                [TUEG_labels.append(label) for ff in this_file_names if id in os.path.basename(ff)]
+
+
+        if append_csv_set_to_TUAB:
+            # Join TUAB and TUAB+, avoiding redundancies between TUAB and AutoTUAB
+            TUAB_basenames = [os.path.basename(fn) for fn in all_file_names]
+            new_TUEG_inds = [i for i,fn in enumerate(all_labelled_TUEG_file_names) if os.path.basename(fn) not in TUAB_basenames]
+            all_file_names += [all_labelled_TUEG_file_names[i] for i in new_TUEG_inds]
+            labels += [TUEG_labels[i] for i in new_TUEG_inds]
+        else:
+            labels = TUEG_labels
+            all_file_names = all_labelled_TUEG_file_names
+
+    labels = np.array(labels).astype(np.int64)
+
+    log.info("{:d} files in total.".format(len(all_file_names)))
+
+    return all_file_names, labels
 
 
 class DiagnosisSet(object):
     def __init__(self, n_recordings, max_recording_mins, preproc_functions,
                  data_folders,
                  train_or_eval='train', sensor_types=['EEG'], training_labels_from_csv=False,
-                 balance_data=False):
+                 balance_data=False, append_csv_set_to_TUAB=False):
         self.n_recordings = n_recordings
         self.max_recording_mins = max_recording_mins
         self.preproc_functions = preproc_functions
@@ -215,13 +234,15 @@ class DiagnosisSet(object):
         self.data_folders = data_folders
         self.training_labels_from_csv = training_labels_from_csv
         self.balance_data = balance_data
+        self.append_csv_set_to_TUAB = append_csv_set_to_TUAB
 
     def load(self, only_return_labels=False):
         log.info("Read file names")
         all_file_names, labels = get_all_sorted_file_names_and_labels(
             train_or_eval=self.train_or_eval,
             folders=self.data_folders,
-            training_labels_from_csv=self.training_labels_from_csv)
+            training_labels_from_csv=self.training_labels_from_csv,
+            append_csv_set_to_TUAB=self.append_csv_set_to_TUAB)
 
         if self.max_recording_mins is not None:
             log.info("Read recording lengths...")
@@ -297,6 +318,7 @@ class DiagnosisSet(object):
         fns = np.copy(file_names)
         np.random.shuffle(fns)
         fns_to_pick_from = fns.tolist() # For ease of 'popping'
+        random.shuffle(fns_to_pick_from) # Shuffle so that we don't always pick the first file in the session.
         fns_picked = []
         sub_IDs = [os.path.basename(fn).split('_')[0] for fn in file_names]
         unique_sub_IDs = np.unique(sub_IDs)
