@@ -4,9 +4,9 @@
 data_folders = [
     # 'H:\TUAB2/normal/edf/',
     # 'H:\TUAB2/abnormal/edf/',
-    'H:\TUAB2_relabelled/normal/edf/',
-    'H:\TUAB2_relabelled/abnormal/edf/',
-    'H:\TUEG/']
+    'G:\TUAB2_relabelled/normal/edf/',
+    'G:\TUAB2_relabelled/abnormal/edf/',
+    'G:\TUEG/']
 n_recordings = None  # set to an integer, if you want to restrict the set size
 sensor_types = ["EEG"]
 n_chans = 21

@@ -230,7 +230,7 @@ def run_exp(data_folders,
     if reload_data_each_exp or X is None:
         X,y = dataset.load()
         import pickle
-        pickle.dump([X, y], open( "H:/auto-eeg_TUABPlus_1min.pkl", "wb" ))
+        pickle.dump([X, y], open( "G:/auto-eeg_TUABPlus_1min.pkl", "wb" ))
 
     # print(X)
     log.info(f"{len(X)} files in train+val data.")

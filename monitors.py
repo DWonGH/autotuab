@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.metrics import roc_auc_score
+import datetime
 
 from braindecode.datautil.iterators import _compute_start_stop_block_inds
 
@@ -59,6 +60,10 @@ class CroppedDiagnosisMonitor(object):
         out.update({column_name: float(specificity)})
         if (n_negative > 0) and (n_positive > 0):
             auc = roc_auc_score(y, mean_preds_per_trial[:,1])
+            # Save to file for subsequent ROC plotting
+            datetime_object = datetime.datetime.now()
+            roc_file_name = "Auto Diagnosis ROC File " + datetime_object.strftime("%Y-%m-%d %H_%M_%S")
+            np.savez(roc_file_name, labels=y, scores=mean_preds_per_trial[:,1])
         else:
             auc = np.nan
         column_name = "{:s}_auc".format(setname)

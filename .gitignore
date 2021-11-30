@@ -1,6 +1,7 @@
 # Project-specific items
 Auto Diagnosis Log File*
 config_overrider.py
+*.npz
 
 
 # Generic Python gitignore
