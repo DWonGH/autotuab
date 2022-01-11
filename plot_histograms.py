@@ -12,21 +12,30 @@ runs = [{'name': 'AutoTUAB', 'fn':'Auto Diagnosis ROC File 2021-11-30 16_30_21.n
 # runs = [{'name': 'AutoTUAB', 'fn':'Auto Diagnosis ROC File 2021-11-30 17_04_45.npz'},
 #         {'name': 'TUAB', 'fn':'Auto Diagnosis ROC File 2021-12-02 12_03_05.npz'}] # Test
 
-for run in runs:
+f, ax = plt.subplots(1, len(runs), sharex=True, sharey=True)
+
+for k, run in enumerate(runs):
     # Load data
     data = np.load(run['fn'])
-    y = data['labels']
-    pred = data['scores']
+    labels = data['labels']
+    abnormality = np.exp(data['scores'])
+    normality = np.exp(data['scores_normal'])
 
-    # Calculate and plot ROC
-    fpr, tpr, thresholds = metrics.roc_curve(y, pred)
-    roc_auc = metrics.auc(fpr, tpr)
-    # display = metrics.RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=roc_auc, estimator_name='example estimator')
-    # display.plot()
-    # plt.plot(fpr, tpr, label=f"{run['name']}, auc={roc_auc}")
-    plt.plot(fpr, tpr, label=f"{run['name']}")
+    # Plot scores for actual normals
+    m_abnormality = np.ma.masked_array(abnormality, mask=labels)
+    # m_normality = np.ma.masked_array(normality, mask=labels)
+    ax[k].hist(m_abnormality, label="normals", alpha=0.5, bins=10)
+
+    # Plot scores for actual abnormals
+    m_abnormality = np.ma.masked_array(abnormality, mask=1-labels)
+    # m_normality = np.ma.masked_array(normality, mask=1-labels)
+    ax[k].hist(m_abnormality, label="abnormals", alpha=0.5, bins=10)
+
+    ax[k].set_xlabel('p(abnormal)')
+    ax[k].set_ylabel('frequency')
+    ax[k].set_title(run['name'])
 
 plt.legend()
-plt.xlabel('1-specificity (FPR)')
-plt.ylabel('sensitivity (FPR)')
 plt.show()
+
+

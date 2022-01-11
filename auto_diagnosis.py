@@ -44,7 +44,7 @@ log_file_name_main = "Auto Diagnosis Log File " + datetime_object.strftime("%Y-%
 
 global X, y, test_X, test_y
 X = y = test_X = test_y = None
-reload_data_each_exp = False
+reload_data_each_exp = True
 
 def create_set(X, y, inds):
     """
@@ -226,11 +226,11 @@ def run_exp(data_folders,
     global X, y, test_X, test_y
     # if X is None:
     #     import pickle
-    #     X, y = pickle.load( open( "H:/auto-eeg_bal2.pkl", "rb" ) )
+    #     X, y = pickle.load( open( "G:/auto-eeg_AutoTUAB.pkl", "rb" ) ) # Caution: This will override paths specified in config_overrider.
     if reload_data_each_exp or X is None:
         X,y = dataset.load()
         import pickle
-        pickle.dump([X, y], open( "G:/auto-eeg_TUABPlus_1min.pkl", "wb" ))
+        pickle.dump([X, y], open( "G:/auto-eeg.pkl", "wb" ))
 
     # print(X)
     log.info(f"{len(X)} files in train+val data.")

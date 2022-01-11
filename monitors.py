@@ -63,7 +63,8 @@ class CroppedDiagnosisMonitor(object):
             # Save to file for subsequent ROC plotting
             datetime_object = datetime.datetime.now()
             roc_file_name = "Auto Diagnosis ROC File " + datetime_object.strftime("%Y-%m-%d %H_%M_%S")
-            np.savez(roc_file_name, labels=y, scores=mean_preds_per_trial[:,1])
+            np.savez(roc_file_name, labels=y, scores=mean_preds_per_trial[:,1],
+                     scores_normal=mean_preds_per_trial[:,0])
         else:
             auc = np.nan
         column_name = "{:s}_auc".format(setname)
