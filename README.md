@@ -1,6 +1,6 @@
 # AutoTUAB
 
-This repository contains code and data used to train Schirrmeister et al's BD-Deep4 convolutional neural network against the variants of the Temple University Hospital Abnormal EEG Corpus (TUAB). In particular, it allows the AutoTUAB dataset to be generated from the larger Temple University Hospital EEG Corpus (TUEG) using labels based on automated classification of the text reports accompanying each EEG session in that database.
+This repository contains code and data used to train Schirrmeister et al's BD-Deep4 convolutional neural network against the variants of the Temple University Hospital Abnormal EEG Corpus (TUAB). In particular, it allows the AutoTUAB dataset to be generated from the larger Temple University Hospital EEG Corpus (TUEG) using labels based on automated classification of the text reports accompanying each EEG session in that database. The processing of the text files is demonstrated in [this Colab Notebook](https://colab.research.google.com/drive/1YG4zof-NuSbU677Nu9UD7HM3WH7XPDry), or you can just follow the instructions below to use previously determined labels.
 
 # Instructions
 
