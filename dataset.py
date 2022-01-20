@@ -3,6 +3,7 @@ import re
 import numpy as np
 import glob
 import os.path
+from os import sep
 import csv
 import random
 
@@ -24,8 +25,8 @@ def natural_key(file_name):
 
 def time_key(file_name):
     """ provides a time-based sorting key """
-    splits = file_name.split('/')
-    [date] = re.findall(r'(\d{4}_\d{2}_\d{2})', splits[-1])
+    splits = file_name.split(sep)
+    [date] = re.findall(r'(\d{4}_\d{2}_\d{2})', splits[-2])
     date_id = [int(token) for token in date.split('_')]
     recording_id = natural_key(splits[-1])
     session_id = session_key(splits[-2])
@@ -181,7 +182,8 @@ def get_all_sorted_file_names_and_labels(train_or_eval, folders, training_labels
         # Generate AutoTUAB/TUAB+ dataset
 
         with open('training_labels.csv', newline='') as csvfile:
-            label_catalog_reader = csv.reader(csvfile, delimiter='\t')
+            # label_catalog_reader = csv.reader(csvfile, delimiter='\t')
+            label_catalog_reader = csv.reader(csvfile)
 
             # Skip the header row (column names)
             next(label_catalog_reader, None)
@@ -189,16 +191,23 @@ def get_all_sorted_file_names_and_labels(train_or_eval, folders, training_labels
             all_labelled_TUEG_file_names = []
             TUEG_labels = []
             for row in label_catalog_reader:
+                # Skip blank lines
+                if len(row)==0:
+                    continue
                 id, _ = os.path.splitext(os.path.basename(row[1]))
                 p_ab = float(row[2])
                 label_from_ML = row[3]
                 label_from_rules = row[4]
-                # if label_from_ML==label_from_rules and (p_ab>=0.99 or p_ab<=0.01):
-                if (p_ab>=0.99 or p_ab<=0.01):
+                comprehensive_decision = row[5]
+                if label_from_rules!=2:
+                    label = label_from_rules
+                elif label_from_rules==2 and (p_ab>=0.99 or p_ab<=0.01):
+                #if (p_ab>=0.99 or p_ab<=0.01):
                     label = label_from_ML
                 else:
                     continue
                 full_folder = os.path.join(TUEG_folders[0], row[0])
+                full_folder = full_folder.replace('/TUEG_txt','')
                 this_file_names = read_all_file_names(full_folder, '.edf', key='time')
                 [all_labelled_TUEG_file_names.append(ff) for ff in this_file_names if id in os.path.basename(ff)]
                 [TUEG_labels.append(label) for ff in this_file_names if id in os.path.basename(ff)]
