@@ -104,7 +104,7 @@ def get_recording_length(file_path):
 def load_data(fname, preproc_functions, sensor_types=['EEG']):
     cnt, sfreq, n_samples, n_channels, chan_names, n_sec = get_info_with_mne(
         fname)
-    log.info("Load data...")
+    log.debug("Load data...")
     cnt.load_data()
     selected_ch_names = []
     if 'EEG' in sensor_types:
@@ -147,9 +147,9 @@ def load_data(fname, preproc_functions, sensor_types=['EEG']):
     # change from volt to mikrovolt
     data = (cnt.get_data() * 1e6).astype(np.float32)
     fs = cnt.info['sfreq']
-    log.info("Preprocessing...")
+    log.debug("Preprocessing...")
     for fn in preproc_functions:
-        log.info(fn)
+        log.debug(fn)
         data, fs = fn(data, fs)
         data = data.astype(np.float32)
         fs = float(fs)
@@ -280,7 +280,8 @@ class DiagnosisSet(object):
         y = []
         n_files = len(cleaned_file_names[:self.n_recordings])
         for i_fname, fname in enumerate(cleaned_file_names[:self.n_recordings]):
-            log.info("Load {:d} of {:d}".format(i_fname + 1,n_files))
+            if i_fname % 100 == 0:
+                log.info("Load {:d} of {:d}".format(i_fname + 1,n_files))
             x = load_data(fname, preproc_functions=self.preproc_functions,
                           sensor_types=self.sensor_types)
             if x is not None and x.shape[1]>=6000:
@@ -292,7 +293,7 @@ class DiagnosisSet(object):
     def __balance_data(self, file_names, labels):
         n_abnormal = np.count_nonzero(labels == 1)
         n_normal = np.count_nonzero(labels == 0)
-        print(f"Started with {n_abnormal} abnormal and {n_normal} normal recordings.")
+        log.info(f"Started with {n_abnormal} abnormal and {n_normal} normal recordings.")
 
         # Separate normals and abnormals
         abnormal_mask = labels == 1
@@ -302,7 +303,7 @@ class DiagnosisSet(object):
 
         # Reduce the larger class
         if n_abnormal > n_normal:
-            print(f"Reducing # of abnormals from {n_abnormal} to {n_normal}")
+            log.info(f"Reducing # of abnormals from {n_abnormal} to {n_normal}")
             abnormal_file_names = self.__pick_n_by_subject(abnormal_file_names, n_normal)
             n_abnormal = n_normal
         else:

@@ -384,6 +384,11 @@ def run_exp(data_folders,
 
     loss_function = lambda preds, targets: F.nll_loss(
         th.mean(preds, dim=2, keepdim=False), targets)
+    # weight_function = lambda targets: max(np.count_nonzero(targets==0), np.count_nonzero(targets==1)) / \
+    #                                   th.tensor([np.count_nonzero(targets==0), np.count_nonzero(targets==1)],
+    #                                             dtype=th.float)
+    # loss_function = lambda preds, targets, weight_function: F.nll_loss(
+    #     th.mean(preds, dim=2, keepdim=False), targets, weight=weight_function(targets))
 
     if model_constraint is not None:
         assert model_constraint == 'defaultnorm'
@@ -410,7 +415,7 @@ if __name__ == "__main__":
     import config
     start_time = time.time()
     logging.basicConfig(format='%(asctime)s %(levelname)s : %(message)s',
-                     level=logging.DEBUG, stream=sys.stdout)
+                     level=logging.INFO, stream=sys.stdout)
 
     config_var_length = 27
 
