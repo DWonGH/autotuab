@@ -209,7 +209,7 @@ def run_exp(data_folders,
                            sensor_types=sensor_types,
                            training_labels_from_csv=training_labels_from_csv,
                            append_csv_set_to_TUAB=append_csv_set_to_TUAB,
-                           balance_data=training_labels_from_csv)
+                           balance_data=False)
     if test_on_eval:
         if test_recording_mins is None:
             test_recording_mins = duration_recording_mins
@@ -383,13 +383,19 @@ def run_exp(data_folders,
                                        n_preds_per_input=n_preds_per_input)
     optimizer = optim.Adam(model.parameters(), lr=init_lr)
 
-    loss_function = lambda preds, targets: F.nll_loss(
-        th.mean(preds, dim=2, keepdim=False), targets)
+    # loss_function = lambda preds, targets: F.nll_loss(
+    #     th.mean(preds, dim=2, keepdim=False), targets)
     # weight_function = lambda targets: max(np.count_nonzero(targets==0), np.count_nonzero(targets==1)) / \
     #                                   th.tensor([np.count_nonzero(targets==0), np.count_nonzero(targets==1)],
     #                                             dtype=th.float)
-    # loss_function = lambda preds, targets, weight_function: F.nll_loss(
-    #     th.mean(preds, dim=2, keepdim=False), targets, weight=weight_function(targets))
+    def weight_function(targets):
+        targets = targets.cpu()
+        weights = max(np.count_nonzero(targets==0), np.count_nonzero(targets==1)) / \
+                                      th.tensor([np.count_nonzero(targets==0), np.count_nonzero(targets==1)],
+                                                dtype=th.float)
+        return weights.cuda()
+    loss_function = lambda preds, targets: F.nll_loss(
+        th.mean(preds, dim=2, keepdim=False), targets, weight=weight_function(targets))
 
     if model_constraint is not None:
         assert model_constraint == 'defaultnorm'
