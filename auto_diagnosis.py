@@ -44,7 +44,7 @@ log_file_name_main = "Auto Diagnosis Log File " + datetime_object.strftime("%Y-%
 
 global X, y, test_X, test_y
 X = y = test_X = test_y = None
-reload_data_each_exp = True
+reload_data_each_exp = False
 
 def create_set(X, y, inds):
     """
@@ -229,8 +229,9 @@ def run_exp(data_folders,
     #     X, y = pickle.load( open( "G:/auto-eeg_AutoTUAB.pkl", "rb" ) ) # Caution: This will override paths specified in config_overrider.
     if reload_data_each_exp or X is None:
         X,y = dataset.load()
-        import pickle
-        pickle.dump([X, y], open( "G:/auto-eeg.pkl", "wb" ))
+        # TODO: pickle causes memory error when duration_recording_mins>=4. Replace pickle with joblib?
+        # import pickle
+        # pickle.dump([X, y], open( "G:/auto-eeg.pkl", "wb" ))
 
     # print(X)
     log.info(f"{len(X)} files in train+val data.")

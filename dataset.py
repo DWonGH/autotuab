@@ -120,7 +120,7 @@ def load_data(fname, preproc_functions, sensor_types=['EEG']):
                     wanted_found_name.append(ch_name)
             # assert len(wanted_found_name) == 1
             if len(wanted_found_name) < 1:
-                log.info("Desired electrodes not found. Skipping this file.")
+                log.debug("Desired electrodes not found. Skipping this file.")
                 return None
             selected_ch_names.append(wanted_found_name[0])
     if 'EKG' in sensor_types:
@@ -199,9 +199,9 @@ def get_all_sorted_file_names_and_labels(train_or_eval, folders, training_labels
                 label_from_ML = row[3]
                 label_from_rules = row[4]
                 comprehensive_decision = row[5]
-                if label_from_rules!=2:
+                if label_from_rules!='2':
                     label = label_from_rules
-                elif label_from_rules==2 and (p_ab>=0.99 or p_ab<=0.01):
+                elif label_from_rules=='2' and (p_ab>=0.99 or p_ab<=0.01):
                 #if (p_ab>=0.99 or p_ab<=0.01):
                     label = label_from_ML
                 else:
