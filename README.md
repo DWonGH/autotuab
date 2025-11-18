@@ -32,6 +32,25 @@ git checkout minimal
 
 Beyond that tag, things deviate from robintibor's original example.
 
+# Citation
+
+If you use this code or the AutoTUAB dataset in your research, please cite the following paper:
+
+**[Automatic Report-Based Labelling of Clinical EEGs for Classifier Training](https://ieeexplore.ieee.org/abstract/document/9672295)** D. Western, T. Weber, R. Kandasamy, F. May, S. Taylor, Y. Zhu, and L. Canham  
+*2021 IEEE Signal Processing in Medicine and Biology Symposium (SPMB)*
+
+## BibTeX
+
+```bibtex
+@inproceedings{western2021automatic,
+  author    = {Western, David and Weber, Timothy and Kandasamy, Rohan and May, Felix and Taylor, Samantha and Zhu, Yixuan and Canham, Luke},
+  title     = {Automatic Report-Based Labelling of Clinical EEGs for Classifier Training},
+  booktitle = {2021 IEEE Signal Processing in Medicine and Biology Symposium (SPMB)},
+  year      = {2021},
+  pages     = {1--7},
+  doi       = {10.1109/SPMB52430.2021.9672295}
+}
+
 # Original README for robintibor/auto-eeg-diagnosis-example
 
 ## Requirements
